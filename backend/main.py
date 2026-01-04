@@ -12,13 +12,22 @@ app = FastAPI(title="Cardio Disease Prediction API")
 # -------------------------------
 # CORS (Next.js)
 # -------------------------------
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=[
+#     "http://localhost:3000",                     
+#     "https://cardio-predictor.vercel.app/",    
+#     "https://*.vercel.app"                 
+# ],
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-    "http://localhost:3000",                     
-    "https://cardio-predictor.vercel.app/",    
-    "https://*.vercel.app"                 
-],
+        "https://cardio-predictor-2fin4z2y4-jasminchauhans-projects.vercel.app"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -97,4 +106,5 @@ def predict(data: InputData):
 
     except Exception as e:
         return {"error": str(e)}
+
 
