@@ -1,6 +1,9 @@
 import { PredictionInput, PredictionResponse } from '@/types/prediction';
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// IMPORTANT: base URL must NOT include /predict
+const API_BASE_URL =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, '') ||
+  'http://localhost:8000';
 
 class APIClient {
   private baseURL: string;
@@ -12,38 +15,33 @@ class APIClient {
   async healthCheck(): Promise<{ status: string }> {
     const response = await fetch(`${this.baseURL}/`);
     if (!response.ok) {
-      throw new Error('API health check failed');
+      throw new Error(`API health check failed: ${response.status}`);
     }
     return response.json();
   }
 
   async predict(data: PredictionInput): Promise<PredictionResponse> {
-    try {
-      const response = await fetch(`${this.baseURL}/predict`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      });
+    const response = await fetch(`${this.baseURL}/predict`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
 
-      if (!response.ok) {
-        throw new Error(`API request failed: ${response.statusText}`);
-      }
-
-      const result: PredictionResponse = await response.json();
-
-      if (result.error) {
-        throw new Error(result.error);
-      }
-
-      return result;
-    } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(`Prediction failed: ${error.message}`);
-      }
-      throw new Error('An unexpected error occurred');
+    // 🔍 Better error visibility
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`API request failed (${response.status}): ${text}`);
     }
+
+    const result: PredictionResponse = await response.json();
+
+    if ((result as any).error) {
+      throw new Error((result as any).error);
+    }
+
+    return result;
   }
 }
 
