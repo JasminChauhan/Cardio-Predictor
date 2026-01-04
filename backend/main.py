@@ -14,7 +14,11 @@ app = FastAPI(title="Cardio Disease Prediction API")
 # -------------------------------
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=[
+    "http://localhost:3000",                     
+    "https://cardio-predictor.vercel.app/",    
+    "https://*.vercel.app"                 
+],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -93,3 +97,4 @@ def predict(data: InputData):
 
     except Exception as e:
         return {"error": str(e)}
+
